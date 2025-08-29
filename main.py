@@ -1,4 +1,5 @@
 import math
+import time
 
 CradlesRaw = """Berc. 182;70;105;15;110;80;175;70
 Berc. 264;50;55;40;50;50;;70
@@ -302,7 +303,7 @@ Cradles = []
 for RawCradle in CradlesRaw.split('\n'):
     (ID, E, D, C, B, A, Glob, H) = RawCradle.split(';')
 
-    print (f"Creating {ID}...")
+    print (f"\nCreating {ID}...")
 
     try:
         pass
@@ -355,36 +356,11 @@ for RawCradle in CradlesRaw.split('\n'):
     }
     Cradles.append(Cradle)
     print(Cradle)
-#print()
 
-
-# Todo: read cradles from input file
-Berc182 = {
-    "ID": "Berc. 182",
-    "A": 80, # Hauteur (partie gauche)
-    "B": 110, # Plat (a gauche)
-    "C": 15, # Largeur dos
-    "D": 105, # Plat (a droit)
-    "E": 70, # Hauteur (partie droite)
-    "H": 70, # Profondeur
-    "Z": None, # largeur globale du berceaux # not always present
-}
-
-BercA1 = {
-    "ID": "Berc. A1",
-    "A": 100, # Hauteur (partie gauche)
-    "B": 115, # Plat (a gauche)
-    "C": 15, # Largeur dos
-    "D": 115, # Plat (a droit)
-    "E": 65, # Hauteur (partie droite)
-    "H": 190, # Profondeur
-    "Z": 200, # largeur globale du berceaux # not always present
-}
-
-#Cradles = [
-#    Berc182,
-#    BercA1
-#    ]
+print(f"\n\nDone processing {len(Cradles)} cradles!")
+time.sleep(1)
+print(f"You will now be asked to enter the dimensions of the book...")
+time.sleep(1)
 
 Ms15137 = {
     "ID": "Ms. 15137",
@@ -415,6 +391,7 @@ try:
     BookDimensionJ = int(input("Enter \'Plat a gauche\' (J) in mm: "))
     BookDimensionK = int(input("Enter \'Largeur dos\' (K) in mm: "))
     BookDimensionHauteurGauche = int(input("Enter \'Hauteur gauche\' in mm: "))
+    
     BookDimensionL = int(input("Enter \'Plat a droite\' (L) in mm: "))
     BookDimensionH = int(input("Enter \'Profondeur\' (H) in mm: "))
     BookDimensionHauteurDroite = int(input("Enter \'Hauteur droite\' in mm: "))
@@ -425,19 +402,20 @@ except:
 
 print(f"\nThanks, book dimensions: {BookDimensionJ}x{BookDimensionK}x{BookDimensionL}x{BookDimensionH} (JxKxLxH) mm")
 
-#key = input("Enter dimensions")
-#print(key)
-#if key == "":
-#    print("yes")
+BookLeftAngleInRads = math.asin(BookDimensionHauteurGauche / BookDimensionJ)
+BookLeftAngleInDegrees = math.degrees(BookLeftAngleInRads)
 
-# sample book dimensions 
-I = 120 # A
-J = 148 # B
-K = 15  # C
-L = 144 # D
-M = 75  # E
-H = 190 # H
+BookRightAngleInRads = math.asin(BookDimensionHauteurDroite / BookDimensionL)
+BookRightAngleInDegrees = math.degrees(BookRightAngleInRads)
+print(f"Calculated angle left: {BookLeftAngleInDegrees:.2f}°, angle right: {BookRightAngleInRads:.2f}°")
 
+print("I will now begin matching the book to cradles.")
+
+TimeOut = 6
+while TimeOut > 0:
+    time.sleep(1)
+    print(". ")
+    TimeOut = TimeOut - 1
 
 Matches = []
 
@@ -445,6 +423,9 @@ print ("Cradles: ", Cradles)
 print ("Matches: ", Matches)
 
 for Cradle in Cradles:
+    id = Cradle["ID"]
+    print(f"\nBegin matching with cradle {id}")
+    
     Match = True
     # Ignore the A/I, E/M dimensions for now
     #if Cradle["A"] >= (I - 10) and Cradle["A"] <= (I + 10):
@@ -496,6 +477,17 @@ for Cradle in Cradles:
     #Match = Match and ((L - 10) <= Cradle["D"] <= (L + 50))
     #print("Plat (a droit): ", L - 10, Cradle["D"], (L + 50))
     
+    # match for the angle as well i.e. the cradle angle should be within 5 degrees of the book angle
+    CradleLeftAngle = Cradle["AngleLeft"]
+    CradleRightAngle = Cradle["AngleRight"]
+    AngleTolerance = 5
+    
+    Match = Match and BookLeftAngleInDegrees - AngleTolerance <= CradleLeftAngle <= BookLeftAngleInDegrees + AngleTolerance
+    print(f"Cradle left angle: {CradleLeftAngle:.2f} mm, book angle range: {BookLeftAngleInDegrees - AngleTolerance:.2f}-{BookLeftAngleInDegrees + AngleTolerance:.2f} mm, match?: {Match}")
+
+    Match = Match and BookRightAngleInDegrees - AngleTolerance <= CradleRightAngle <= BookRightAngleInDegrees + AngleTolerance
+    print(f"Cradle right angle: {CradleRightAngle:.2f} mm, book angle range: {BookRightAngleInDegrees - AngleTolerance:.2f}-{BookRightAngleInDegrees + AngleTolerance:.2f} mm, match?: {Match}")
+
     if Match:
         Matches.append(Cradle)
 
