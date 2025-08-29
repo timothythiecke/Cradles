@@ -1,3 +1,5 @@
+import math
+
 CradlesRaw = """Berc. 182;70;105;15;110;80;175;70
 Berc. 264;50;55;40;50;50;;70
 Berc. 286;80;190;20;190;100;;80
@@ -299,11 +301,16 @@ Cradles = []
 
 for RawCradle in CradlesRaw.split('\n'):
     (ID, E, D, C, B, A, Glob, H) = RawCradle.split(';')
-    try:
-        print(ID, int(E), int(D), int(C), int(B), int(A), int(Glob), int(H))
 
+    print (f"Creating {ID}...")
+
+    try:
+        pass
+        #print(ID, int(E), int(D), int(C), int(B), int(A), int(Glob), int(H))
+        # overkill
     except:
-        print("Problem with one of the elemnts")
+        pass
+        #print("Problem with one of the elements")
     # E
     
     # This can be replaced with a map?
@@ -316,6 +323,22 @@ for RawCradle in CradlesRaw.split('\n'):
         Dimensions[Index] = Dimension
     print(Dimensions)
 
+    # Calculate the angle of the left part of the cradle
+    AngleGauche = 0.0
+    AngleDroite = 0.0
+
+    try:
+        AngleGaucheRad = math.asin(Dimensions[4]/Dimensions[3]) # hauteur partie gauche / plat a gauche = O/S
+        AngleGauche = math.degrees(AngleGaucheRad)
+    except:
+        print("Division by zero: plat gauche is zero")
+
+    try:
+        AngleDroiteRad = math.asin(Dimensions[0]/Dimensions[1]) # hauteur partie droite / plat a droite = O/S
+        AngleDroite = math.degrees(AngleDroiteRad)
+    except:
+        print("Division by zero: plat droite is zero")
+
     Cradle = {
         "ID": ID,
         "A": Dimensions[4], # Hauteur (partie gauche)
@@ -325,8 +348,13 @@ for RawCradle in CradlesRaw.split('\n'):
         "E": Dimensions[0], # Hauteur (partie droite)
         "H": Dimensions[6], # Profondeur
         "Z": None, # largeur globale du berceaux # not always present
+        
+        # additional dimensions calculated automatically but not measured
+        "AngleLeft" : AngleGauche,
+        "AngleRight": AngleDroite,
     }
     Cradles.append(Cradle)
+    print(Cradle)
 #print()
 
 
@@ -377,14 +405,20 @@ BookDimensionL = 0
 #BookDimensionM = 0
 BookDimensionH = 0
 
+BookDimensionHauteurGauche = 0
+BookDimensionHauteurDroite = 0
+
 try:
     #BookDimensionI = int(input("Enter Hauteur (partie gauche) in mm: "))
     #BookDimensionJ = int(input("Enter Hauteur (partie droite) in mm: "))
     print("Please enter the dimensions of the book:", "\n")
     BookDimensionJ = int(input("Enter \'Plat a gauche\' (J) in mm: "))
     BookDimensionK = int(input("Enter \'Largeur dos\' (K) in mm: "))
+    BookDimensionHauteurGauche = int(input("Enter \'Hauteur gauche\' in mm: "))
     BookDimensionL = int(input("Enter \'Plat a droite\' (L) in mm: "))
     BookDimensionH = int(input("Enter \'Profondeur\' (H) in mm: "))
+    BookDimensionHauteurDroite = int(input("Enter \'Hauteur droite\' in mm: "))
+
 except:
     print("Problem while entering dimensions of the book. Exiting...")
     exit() # maybe until dimensions non zero
